@@ -1,0 +1,28 @@
+workflows:
+  ios-unsigned:
+    name: Build Unsigned IPA
+    environment:
+      vars:
+        XCODE_SCHEME: "Anonycord"
+        XCODE_WORKSPACE: "Anonycord.xcodeproj" # or Anonycord.xcworkspace if using SwiftUI + CocoaPods
+    scripts:
+      - name: Build unsigned IPA
+        script: |
+          xcodebuild clean \
+            -project $XCODE_WORKSPACE \
+            -scheme $XCODE_SCHEME
+
+          xcodebuild archive \
+            -project $XCODE_WORKSPACE \
+            -scheme $XCODE_SCHEME \
+            -configuration Release \
+            -archivePath $CM_BUILD_DIR/$XCODE_SCHEME.xcarchive \
+            CODE_SIGNING_ALLOWED=NO
+
+          xcodebuild -exportArchive \
+            -archivePath $CM_BUILD_DIR/$XCODE_SCHEME.xcarchive \
+            -exportPath $CM_BUILD_DIR/build/ipa \
+            -exportOptionsPlist exportOptions.plist \
+            CODE_SIGNING_ALLOWED=NO
+    artifacts:
+      - build/ipa/*.ipa
